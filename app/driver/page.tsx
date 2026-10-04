@@ -72,7 +72,10 @@ export default function DriverPage() {
     setDriverData(null);
     setRawApiResponse(null);
 
-    const number = dlNumber.trim().toUpperCase();
+    //const number = dlNumber.trim().toUpperCase();
+    // ===== NEW CHANGE: Explicit string values =====
+    const number: string = dlNumber.trim().toUpperCase();
+    const dateOfBirth: string = dob.trim();
 
     // ===== Validate DL number =====
     if (!number) {
@@ -81,10 +84,11 @@ export default function DriverPage() {
     }
 
     // ===== Validate DOB =====
-    if (!dob) {
+    if (!dateOfBirth) {
       setError("Please select date of birth.");
       return;
     }
+
 
     try {
       setLoading(true);
@@ -93,7 +97,7 @@ export default function DriverPage() {
       console.log("LORRYINFO API KEY from .env:", process.env.NEXT_PUBLIC_LORRYINFO_API_KEY);
       console.log("Searching for DL number:", number, "DOB:", dob);
       // ===== NEW CHANGE: Call Next.js server API =====
-      const response = await fetch(apiUrl, {
+      const response: Response = await fetch(apiUrl, {
         method: "POST",
 
         headers: {
@@ -103,58 +107,20 @@ export default function DriverPage() {
 
         body: JSON.stringify({
           dlnumber: number,
-          dob: dob,
+          dob: dateOfBirth,
         }),
 
         cache: "no-store",
       });
 
-      //       const response = `{
-      //   "success": true,
-      //   "data": {
-      //     "personal": {
-      //       "name": "S*N*E*",
-      //       "fatherName": "M*K*S* *K*M*R",
-      //       "dob": "1*9*-*2*3*",
-      //       "aadhaar": null,
-      //       "address": "J*K*A*A, K*s*i*R*w*r*,*R, R*w*r*",
-      //       "blood": "Unknown",
-      //       "mobile": "9*9*6*2*4*",
-      //       "gender": "Male",
-      //       "qualification": null
-      //     },
-      //     "license": {
-      //       "number": "DL04 20190012345",
-      //       "issuedBy": "RLA Sample District (NT)",
-      //       "issuedOn": "2019-03-27",
-      //       "status": "Active",
-      //       "validity": {
-      //         "nonTransport": "2019-03-27→2039-03-26",
-      //         "transport": "null→null"
-      //       }
-      //     },
-      //     "classes": [
-      //       {
-      //         "class": "LIGHT MOTOR VEHICLE",
-      //         "issued": "2019-03-27",
-      //         "status": "Active"
-      //       },
-      //       {
-      //         "class": "Motor Cycle with Gear(Non Transport)",
-      //         "issued": "2019-03-27",
-      //         "status": "Active"
-      //       }
-      //     ]
-      //   }
-      // }`;
-
-      // ===== NEW CHANGE: Read JSON response =====
-      const result: DriverApiResponse = JSON.parse(response);
-
       console.log("DL API Status:", response.status);
+
+      // ===== NEW CHANGE: Parse response only once =====
+      const result: DriverApiResponse = await response.json();
+
       console.log("DL API Response:", result);
 
-      // ===== NEW CHANGE: Store raw response =====
+      // ===== Store raw API response =====
       setRawApiResponse(result);
 
       // ===== Handle API error =====
@@ -167,7 +133,7 @@ export default function DriverPage() {
         return;
       }
 
-      // ===== NEW CHANGE: Store driver data =====
+      // ===== Store driver data =====
       setDriverData(result.data || null);
 
     } catch (err) {
