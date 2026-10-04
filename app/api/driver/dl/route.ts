@@ -7,13 +7,15 @@ export async function POST(request: NextRequest) {
   try {
     // ===== NEW CHANGE: Read request body =====
     const body = await request.json();
-
+    console.log("Received request body:", body);
+    
     const dlNumber = body?.dlnumber
       ?.trim()
       ?.toUpperCase();
 
     const dob = body?.dob?.trim();
-
+    console.log("Parsed DL number:", dlNumber);
+    console.log("Parsed DOB:", dob);
     // ===== NEW CHANGE: Validate DL number =====
     if (!dlNumber) {
       return NextResponse.json(
@@ -37,7 +39,10 @@ export async function POST(request: NextRequest) {
     }
 
     // ===== NEW CHANGE: Read API key from server environment =====
-    const apiKey = process.env.LORRYINFO_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_LORRYINFO_API_KEY;
+    console.log("Url:", DL_API_URL);
+    console.log("Using LORRYINFO_API_KEY from server environment:", apiKey);
+    console.log("Calling LorryInfo DL API with DL number:", dlNumber, "and DOB:", dob);
 
     if (!apiKey) {
       console.error("LORRYINFO_API_KEY is missing");
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Vehicle API configuration is missing.",
+          message: "DL API configuration is missing."+apiKey,
         },
         { status: 500 }
       );

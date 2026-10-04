@@ -50,8 +50,8 @@ interface DriverApiResponse {
 
 export default function DriverPage() {
   // ===== NEW CHANGE: Form state =====
-  const [dlNumber, setDlNumber] = useState("");
-  const [dob, setDob] = useState("");
+  const [dlNumber, setDlNumber] = useState("UP112160024911");
+  const [dob, setDob] = useState("1988-09-12");
 
   // ===== NEW CHANGE: API state =====
   const [loading, setLoading] = useState(false);
@@ -61,8 +61,14 @@ export default function DriverPage() {
   const [driverData, setDriverData] = useState<DriverData | null>(null);
 
   // ===== NEW CHANGE: Raw API response =====
-  const [rawApiResponse, setRawApiResponse] =
-    useState<DriverApiResponse | null>(null);
+  // ===== NEW CHANGE: Raw API response state =====
+  const [rawApiResponse, setRawApiResponse] = useState<{
+    rc: any;
+    challan: any;
+  }>({
+    rc: null,
+    challan: null,
+  });
 
   const [showRawResponse, setShowRawResponse] = useState(false);
 
@@ -72,19 +78,21 @@ export default function DriverPage() {
     setDriverData(null);
     setRawApiResponse(null);
 
-    //const number = dlNumber.trim().toUpperCase();
-    // ===== NEW CHANGE: Explicit string values =====
-    const number: string = dlNumber.trim().toUpperCase();
-    const dateOfBirth: string = dob.trim();
+    // ===== NEW CHANGE: Ensure values are always strings =====
+    const number = String(dlNumber ?? "")
+      .trim()
+      .toUpperCase();
+
+    const dateOfBirth = String(dob ?? "").trim();
 
     // ===== Validate DL number =====
-    if (!number) {
+    if (number.length === 0) {
       setError("Please enter driving license number.");
       return;
     }
 
     // ===== Validate DOB =====
-    if (!dateOfBirth) {
+    if (dateOfBirth.length === 0) {
       setError("Please select date of birth.");
       return;
     }
@@ -97,7 +105,7 @@ export default function DriverPage() {
       console.log("LORRYINFO API KEY from .env:", process.env.NEXT_PUBLIC_LORRYINFO_API_KEY);
       console.log("Searching for DL number:", number, "DOB:", dob);
       // ===== NEW CHANGE: Call Next.js server API =====
-      const response: Response = await fetch(apiUrl, {
+      const response: Response = await fetch('/api/driver/dl', {
         method: "POST",
 
         headers: {
@@ -118,13 +126,13 @@ export default function DriverPage() {
       // ===== NEW CHANGE: Parse response only once =====
       const result: DriverApiResponse = await response.json();
 
-      console.log("DL API Response:", result);
+      console.log("DL API Result:", result);
 
       // ===== Store raw API response =====
       setRawApiResponse(result);
 
       // ===== Handle API error =====
-      if (!response.ok || !result.success) {
+      if (!response.ok || result.success !== true) {
         setError(
           result.message ||
           "Unable to retrieve driving license information."
@@ -134,7 +142,7 @@ export default function DriverPage() {
       }
 
       // ===== Store driver data =====
-      setDriverData(result.data || null);
+      setDriverData(result.data ?? null);
 
     } catch (err) {
       console.error("Driver Search Error:", err);

@@ -178,7 +178,7 @@ export default function VehiclePage() {
         rc: null,
         challan: null,
     });
-    const [vehicleNumber, setVehicleNumber] = useState("UP11CD4936");
+    const [vehicleNumber, setVehicleNumber] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [vehicleData, setVehicleData] = useState<VehicleData | null>(null);
@@ -191,37 +191,93 @@ export default function VehiclePage() {
         //static data pass for testing
         // ===== NEW CHANGE: Static RC API response for testing =====
         // ===== NEW CHANGE: Static RC response =====
-        const rcResponse = new Response(
-            JSON.stringify({
-                success: true,
-                data: {
-                    stautsMessage: "OK",
-                    rc_regn_no: "DL01AB1234",
-                    rc_regn_dt: "05-Jun-2020",
-                    rc_regn_upto: "04-Jun-2035",
-                    rc_owner_name: "J*** D**",
-                    state_cd: "DL",
-                    rto_cd: "01",
-                    rc_present_address: "Delhi, 110001",
-                    rc_permanent_address: "Delhi, 110001",
-                    rc_vh_class_desc: "Motor Car(LMV)",
-                    rc_maker_desc: "MARUTI SUZUKI INDIA LTD",
-                    rc_maker_model: "SWIFT VXI",
-                    rc_fuel_desc: "PETROL",
-                    rc_color: "WHITE",
-                    rc_status: "ACTIVE",
-                    loadingCapacity: 400,
-                    vehicleAge: "5 Years - 8 Months - 11 Days",
-                    vehicleAgeFraction: "5.73 Years",
-                },
-            }),
-            {
-                status: 200,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        // ===== NEW CHANGE: Static RC response for testing =====
+        const rcResult = {
+            success: true,
+            data: {
+                stautsMessage: "OK",
+                rc_regn_no: "DL01AB1234",
+                rc_regn_dt: "05-Jun-2020",
+                rc_regn_upto: "04-Jun-2035",
+                rc_purchase_dt: "01-Jun-2020",
+                rc_owner_sr: "1",
+                rc_owner_name: "J*** D**",
+                state_cd: "DL",
+                rto_cd: "01",
+                api_response_message: "No response received from AITP API.",
+                rc_present_address: "Delhi, 110001",
+                rc_permanent_address: "Delhi, 110001",
+                rc_vch_catg: "LMV",
+                rc_vh_class_desc: "Motor Car(LMV)",
+                rc_vhclass_desc: "Motor Car",
+                rc_chasi_no: "MA3ERLF1S001*****",
+                rc_eng_no: "K12M*****",
+                rc_maker_desc: "MARUTI SUZUKI INDIA LTD",
+                rc_maker_model: "SWIFT VXI",
+                rc_body_type_desc: "SALOON",
+                rc_fuel_desc: "PETROL",
+                rc_color: "WHITE",
+                rc_norms_desc: "BHARAT STAGE IV",
+                rc_fit_upto: "04-Jun-2025",
+                rc_np_from: "05-Jun-2024",
+                rc_np_upto: "04-Jun-2025",
+                rc_np_issued_by: "Secretary RTA, Delhi",
+                rc_tax_upto: "31-03-2025",
+                rc_financer: "HDFC Bank",
+                rc_insurance_comp:
+                    "ICICI Lombard General Insurance Co. Ltd.",
+                rc_insurance_policy_no: "3003/123456789/00/000",
+                rc_insurance_upto: "04-Jun-2025",
+                rc_manu_month_yr: "5/2020",
+                rc_unld_wt: "1050",
+                rc_gvw: "1450",
+                rc_no_cyl: "4",
+                rc_cubic_cap: "1197.00",
+                rc_seat_cap: "5",
+                rc_sleeper_cap: "0",
+                rc_stand_cap: "0",
+                rc_wheelbase: "2450",
+                rc_registered_at: "RTA, Delhi",
+                rc_status_as_on: "16-Feb-2026",
+                rc_pucc_upto: "04-Jun-2025",
+                rc_pucc_no: "DL0100123456789",
+                rc_status: "ACTIVE",
+                rc_blacklist_status: "",
+                rc_permit_no: "DL2020-NP-12345",
+                rc_permit_issue_dt: "05-Jun-2020",
+                rc_permit_valid_from: "05-Jun-2020",
+                rc_permit_valid_upto: "04-Jun-2025",
+                rc_permit_code: "101",
+                rc_permit_type:
+                    "National Permit [LIGHT MOTOR VEHICLE]",
+                rc_permit_catg: "102",
+                rc_permit_issuing_authority: "RTA, Delhi",
+                rc_permit_service_type: "",
+                rc_permit_route_region: "",
+                rc_noc_details: "",
+                rc_vh_type: "N",
+                rc_vh_class: "10",
+                rc_noc_dt: "",
+                rc_fuel_cd: "1",
+                rc_maker_cd: "21",
+                rc_model_cd: "SWIFT001",
+                rc_norms_cd: "4",
+                rc_sale_amt: "550000.0",
+                rc_own_catg_desc: "INDIVIDUAL",
+                rc_vch_catg_desc: "LIGHT MOTOR VEHICLE",
+                rc_owner_cd_desc: "INDIVIDUAL",
+                rc_vehicle_surrendered_to_dealer: "0",
+                rc_currentadd_districtcode: "0",
+                rc_non_use: "false",
+                rc_passenger_tax: "",
+                rc_goods_tax: "",
+                rc_no_of_axle: "2",
+                rc_tax_mode: "Y",
+                loadingCapacity: 400,
+                vehicleAge: "5 Years - 8 Months - 11 Days",
+                vehicleAgeFraction: "5.73 Years",
+            },
+        };
 
 
         //         const challanResponse = `{
@@ -301,7 +357,6 @@ export default function VehiclePage() {
         // }`;
         //live api call
 
-        const vehicleNumber = "DL11CA6356"; // Replace with the actual vehicle number you want to search for
         if (!vehicleNumber) {
             setError("Please enter a vehicle registration number.");
             return;
@@ -311,22 +366,26 @@ export default function VehiclePage() {
         console.log("CHALLAN API URL from .env:", process.env.NEXT_PUBLIC_CHALLAN_API_URL);
         console.log("LORRYINFO API KEY from .env:", process.env.NEXT_PUBLIC_LORRYINFO_API_KEY);
 
-        const challanResponse: Response = await fetch(`https://apeeeei.lorryinfo.com/api/v1/echallanByVehicle`, {
+        const challanResponse: Response = await fetch(`https://api.lorryinfo.com/api/v1/echallanByVehicle`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-api-key": "7b9bc6bf-0b6f-4659-8907-c2ad0017ecf4"
+                "x-api-key": "0f4df7bf-0479-4ac8-b978-473a3368bed4"
             },
             body: JSON.stringify({ vehicleNumber }),
         });
 
 
         // ===== NEW CHANGE: Read JSON responses =====
-        const rcResult = await rcResponse.json();
+        //const rcResult = await rcResponse.json();
         const challanResult = await challanResponse.json();
 
         // ===== NEW CHANGE: Log API result =====
         console.log("RC Result:", rcResult);
+        if (!rcResult.success) {
+            setError("Unable to retrieve vehicle information.");
+            return;
+        }
         console.log("Challan Result:", challanResult);
         console.log("RC Result.data:", rcResult.data);
         console.log("Challan Result.data:", challanResult.data);
@@ -335,8 +394,8 @@ export default function VehiclePage() {
         setChallanData(challanResult.data);
         // ===== NEW CHANGE: Save complete raw responses =====
         setRawApiResponse({
-            rc: rcResult.json ? rcResult.json() : JSON.parse(rcResult),
-            challan: challanResult.json ? challanResult.json() : JSON.parse(challanResult),
+            rc: rcResult,
+            challan: challanResult,
         });
     };
 
@@ -416,9 +475,12 @@ export default function VehiclePage() {
                     )}
                 </div>
 
-                {/* Vehicle Information */}
                 {vehicleData && (
-                    <>
+                    <div className="bg-white rounded-xl border border-slate-200 p-5">
+                        <h2 className="text-lg font-semibold text-slate-800 mb-5">
+                            Vehicle Information
+                        </h2>
+
                         {/* Summary */}
                         <div className="bg-white rounded-xl border border-slate-200 p-5">
                             <div className="
@@ -529,7 +591,7 @@ export default function VehiclePage() {
                                 />
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
 
                 {/* Challan Information */}

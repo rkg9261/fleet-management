@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ===== NEW CHANGE: Read API key from server environment =====
-    const apiKey = process.env.LORRYINFO_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_LORRYINFO_API_KEY;
 
     if (!apiKey) {
       console.error("LORRYINFO_API_KEY is missing");
